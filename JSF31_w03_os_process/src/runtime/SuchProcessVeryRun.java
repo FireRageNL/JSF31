@@ -52,7 +52,7 @@ public class SuchProcessVeryRun implements Runnable {
             }
             Thread.sleep(1000);
             proc.waitFor();
-            System.out.println(command + " " + argument+" Terminated" );
+            System.out.println(command + " " + argument+" Terminatedsudo" );
         } catch (IOException ex) {
             Logger.getLogger(SuchProcessVeryRun.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
