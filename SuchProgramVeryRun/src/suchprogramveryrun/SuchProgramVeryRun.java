@@ -21,7 +21,6 @@ public class SuchProgramVeryRun {
      */
     public static void main(String[] args) throws IOException {
         Properties prop = new Properties();
-
         Map<String,String>env = System.getenv();
         env.keySet().stream().filter((envName) -> (envName.equals("TestEnviron"))).forEach((envName) -> {
             prop.setProperty(envName, env.get(envName));
