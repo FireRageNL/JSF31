@@ -5,6 +5,7 @@
  */
 package calculate;
 
+import static java.lang.System.gc;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
@@ -35,7 +36,8 @@ public class KochManager implements Observer{
         koch.generateBottomEdge();
         koch.generateLeftEdge();
         koch.generateRightEdge();
-        
+        drawEdges();
+        gc();
         ts.setEnd("Drawing end");
        application.setTextCalc(ts.toString());
        application.setTextNrEdges(String.valueOf(koch.getNrOfEdges()));
@@ -55,7 +57,6 @@ public class KochManager implements Observer{
     public void update(Observable o, Object arg) {
         koch = (KochFractal)o;
         edges.add((Edge)arg);
-        drawEdges();
-
+        //drawEdges();
     }
 }
