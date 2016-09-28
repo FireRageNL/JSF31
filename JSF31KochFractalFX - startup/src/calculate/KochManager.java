@@ -5,7 +5,6 @@
  */
 package calculate;
 
-import static java.lang.System.gc;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
@@ -33,6 +32,7 @@ public class KochManager implements Observer {
         koch.setLevel(level);
         TimeStamp ts = new TimeStamp();
         ts.setBegin("Drawing start");
+<<<<<<< HEAD
 
         Thread tLeft = new Thread(new KochRunnable(koch, 0, this));
         Thread tRight = new Thread(new KochRunnable(koch, 1, this));
@@ -42,6 +42,13 @@ public class KochManager implements Observer {
         tBottom.start();
         drawEdges();
         gc();
+=======
+        
+        koch.generateBottomEdge();
+        koch.generateLeftEdge();
+        koch.generateRightEdge();
+        
+>>>>>>> parent of b2cc166... such speed very fast
         ts.setEnd("Drawing end");
         application.setTextCalc(ts.toString());
         application.setTextNrEdges(String.valueOf(koch.getNrOfEdges()));
@@ -59,9 +66,16 @@ public class KochManager implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
+<<<<<<< HEAD
         koch = (KochFractal) o;
         edges.add((Edge) arg);
         //drawEdges();
+=======
+        koch = (KochFractal)o;
+        edges.add((Edge)arg);
+        drawEdges();
+
+>>>>>>> parent of b2cc166... such speed very fast
     }
 
     public void addEdges(ArrayList edges) {
