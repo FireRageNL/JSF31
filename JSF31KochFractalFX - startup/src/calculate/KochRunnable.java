@@ -16,15 +16,19 @@ import java.util.Observer;
 public class KochRunnable implements Runnable, Observer{
     private KochFractal koch;
     private int side;
+    private KochManager km;
+    private ArrayList edges;
     
-    public KochRunnable(int side){
+    public KochRunnable(KochFractal koch, int side, KochManager km){
         this.side = side;
-        koch = new KochFractal();
-        koch.addObserver(this);
+        this.koch = koch;
+        this.km = km;
+        edges = new ArrayList<>();
+
     }
     
     @Override
-    public void run() {
+    synchronized public void run() {
         if(side == 0){
             generateLeftThread();
         }
@@ -50,7 +54,11 @@ public class KochRunnable implements Runnable, Observer{
     }
 
     @Override
-    public void update(Observable o, Object arg) {
-        
+    public synchronized void update(Observable o, Object arg) {
+        edges.add((Edge)arg);
+        km.IncreaseCount();
+        if(km.getCount() == 3){
+            km.drawEdges();
+        }
     }
 }

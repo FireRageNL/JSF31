@@ -16,58 +16,71 @@ import timeutil.TimeStamp;
  *
  * @author daan
  */
-public class KochManager implements Observer{
-    
+public class KochManager implements Observer {
+
     private JSF31KochFractalFX application;
     private KochFractal koch;
     private ArrayList<Edge> edges;
-    
-    public KochManager(JSF31KochFractalFX object){
+    private int count = 0;
+
+    public KochManager(JSF31KochFractalFX object) {
         application = object;
         edges = new ArrayList<Edge>();
     }
-    
-    public void changeLevel(int level){
+
+    public void changeLevel(int level) {
         edges.clear();
         koch.setLevel(level);
         TimeStamp ts = new TimeStamp();
         ts.setBegin("Drawing start");
-        
-        KochRunnable left = new KochRunnable(0);
-        KochRunnable right = new KochRunnable(1);
-        KochRunnable bottom = new KochRunnable(2);
-        
-        Thread tLeft = new Thread(left);
+
+        Thread tLeft = new Thread(new KochRunnable(koch, 0, this));
+        Thread tRight = new Thread(new KochRunnable(koch, 1, this));
+        Thread tBottom = new Thread(new KochRunnable(koch, 2, this));
         tLeft.start();
-        
-        Thread tRight = new Thread(right);
         tRight.start();
-        
-        Thread tBottom = new Thread(bottom);
         tBottom.start();
-        
+        try{
+            tLeft.join();
+            tRight.join();
+            tBottom.join();
+        }
+        catch(Exception ex){
+            
+        }
         drawEdges();
         gc();
         ts.setEnd("Drawing end");
-       application.setTextCalc(ts.toString());
-       application.setTextNrEdges(String.valueOf(koch.getNrOfEdges()));
+        application.setTextCalc(ts.toString());
+        application.setTextNrEdges(String.valueOf(koch.getNrOfEdges()));
     }
-    
-    public void drawEdges(){
-        
+
+    public void drawEdges() {
+
         application.clearKochPanel();
-        
-       for(Edge e : edges){
-           application.drawEdge(e);
-       }
+
+        for (Edge e : edges) {
+            application.drawEdge(e);
+        }
 
     }
 
     @Override
     public void update(Observable o, Object arg) {
-        koch = (KochFractal)o;
-        
-        edges.add((Edge)arg);
+        koch = (KochFractal) o;
+        edges.add((Edge) arg);
         //drawEdges();
+    }
+
+    public void addEdges(ArrayList edges) {
+        this.edges.addAll(edges);
+    }
+
+    void IncreaseCount() {
+        count++;
+    }
+
+    int getCount() {
+        return count;
     }
 }
