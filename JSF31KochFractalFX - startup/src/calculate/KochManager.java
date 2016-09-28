@@ -33,9 +33,19 @@ public class KochManager implements Observer{
         TimeStamp ts = new TimeStamp();
         ts.setBegin("Drawing start");
         
-        koch.generateBottomEdge();
-        koch.generateLeftEdge();
-        koch.generateRightEdge();
+        KochRunnable left = new KochRunnable(koch, 0);
+        KochRunnable right = new KochRunnable(koch, 1);
+        KochRunnable bottom = new KochRunnable(koch, 2);
+        
+        Thread tLeft = new Thread(left);
+        tLeft.run();
+        
+        Thread tRight = new Thread(right);
+        tRight.run();
+        
+        Thread tBottom = new Thread(bottom);
+        tBottom.run();
+        
         drawEdges();
         gc();
         ts.setEnd("Drawing end");
