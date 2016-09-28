@@ -40,14 +40,6 @@ public class KochManager implements Observer {
         tLeft.start();
         tRight.start();
         tBottom.start();
-        try{
-            tLeft.join();
-            tRight.join();
-            tBottom.join();
-        }
-        catch(Exception ex){
-            
-        }
         drawEdges();
         gc();
         ts.setEnd("Drawing end");
