@@ -24,7 +24,7 @@ public class KochRunnable implements Runnable, Observer{
     }
     
     @Override
-    public  void run() {
+    public void run() {
         if(side == 0){
             generateLeftThread();
         }
