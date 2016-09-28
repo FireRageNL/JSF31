@@ -33,18 +33,18 @@ public class KochManager implements Observer{
         TimeStamp ts = new TimeStamp();
         ts.setBegin("Drawing start");
         
-        KochRunnable left = new KochRunnable(koch, 0);
-        KochRunnable right = new KochRunnable(koch, 1);
-        KochRunnable bottom = new KochRunnable(koch, 2);
+        KochRunnable left = new KochRunnable(0);
+        KochRunnable right = new KochRunnable(1);
+        KochRunnable bottom = new KochRunnable(2);
         
         Thread tLeft = new Thread(left);
-        tLeft.run();
+        tLeft.start();
         
         Thread tRight = new Thread(right);
-        tRight.run();
+        tRight.start();
         
         Thread tBottom = new Thread(bottom);
-        tBottom.run();
+        tBottom.start();
         
         drawEdges();
         gc();
@@ -60,12 +60,13 @@ public class KochManager implements Observer{
        for(Edge e : edges){
            application.drawEdge(e);
        }
-       
+
     }
 
     @Override
     public void update(Observable o, Object arg) {
         koch = (KochFractal)o;
+        
         edges.add((Edge)arg);
         //drawEdges();
     }

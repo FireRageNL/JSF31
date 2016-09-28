@@ -6,22 +6,25 @@
 package calculate;
 
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  *
  * @author daan
  */
-public class KochRunnable implements Runnable{
+public class KochRunnable implements Runnable, Observer{
     private KochFractal koch;
     private int side;
     
-    public KochRunnable(KochFractal koch, int side){
-        this.koch = koch;
+    public KochRunnable(int side){
         this.side = side;
+        koch = new KochFractal();
+        koch.addObserver(this);
     }
     
     @Override
-    public void run() {
+    public  void run() {
         if(side == 0){
             generateLeftThread();
         }
@@ -31,17 +34,23 @@ public class KochRunnable implements Runnable{
         else{
             generateBottomThread();
         }
+        
     }
     
-    public void generateLeftThread(){
+    public synchronized void generateLeftThread(){
         koch.generateLeftEdge();
     }
     
-    public void generateRightThread(){
+    public synchronized void generateRightThread(){
         koch.generateRightEdge();
     }
     
-    public void generateBottomThread(){
+    public synchronized void generateBottomThread(){
         koch.generateBottomEdge();
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        
     }
 }
