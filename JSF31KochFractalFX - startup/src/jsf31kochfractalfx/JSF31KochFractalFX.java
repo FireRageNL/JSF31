@@ -156,12 +156,8 @@ public class JSF31KochFractalFX extends Application {
         
         // Create Koch manager and set initial level
         resetZoom();
-        koch = new KochFractal();
         kochManager = new KochManager(this);
-        koch.addObserver(kochManager);
-        koch.generateBottomEdge();
-        koch.generateLeftEdge();
-        koch.generateRightEdge();
+        //koch.addObserver(kochManager);
         kochManager.changeLevel(currentLevel);
         // Create the scene and add the grid pane
         Group root = new Group();

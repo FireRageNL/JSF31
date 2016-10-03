@@ -5,7 +5,6 @@
  */
 package calculate;
 
-import static java.lang.System.gc;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
@@ -16,47 +15,65 @@ import timeutil.TimeStamp;
  *
  * @author daan
  */
-public class KochManager implements Observer{
-    
+public class KochManager implements Observer {
+
     private JSF31KochFractalFX application;
     private KochFractal koch;
     private ArrayList<Edge> edges;
-    
-    public KochManager(JSF31KochFractalFX object){
+    private int count;
+    public TimeStamp ts;
+    public TimeStamp ts2;
+
+    public KochManager(JSF31KochFractalFX object) {
         application = object;
-        edges = new ArrayList<Edge>();
+        edges = new ArrayList<>();
+        this.koch = new KochFractal();
     }
-    
-    public void changeLevel(int level){
+
+    public synchronized void count() {
+        count++;
+        if (count >= 3) {
+            ts.setEnd("Calculating end");
+            application.requestDrawEdges();
+        }
+    }
+
+    public synchronized void changeLevel(int level) {
         edges.clear();
         koch.setLevel(level);
-        TimeStamp ts = new TimeStamp();
-        ts.setBegin("Drawing start");
-        
-        koch.generateBottomEdge();
-        koch.generateLeftEdge();
-        koch.generateRightEdge();
-        drawEdges();
-        gc();
-        ts.setEnd("Drawing end");
-       application.setTextCalc(ts.toString());
-       application.setTextNrEdges(String.valueOf(koch.getNrOfEdges()));
+        count = 0;
+        this.ts = new TimeStamp();
+        ts.setBegin("Calculating start");
+
+        Thread bottomThread = new Thread(new GenerateBottom(this, new KochFractal(), koch.getLevel()));
+        bottomThread.start();
+        Thread leftThread = new Thread(new GenerateLeft(this, new KochFractal(), koch.getLevel()));
+        leftThread.start();
+        Thread rightThread = new Thread(new GenerateRight(this, new KochFractal(), koch.getLevel()));
+        rightThread.start();
+
     }
-    
-    public void drawEdges(){
-        
+
+    public synchronized void updateEdges(Edge e) {
+        edges.add(e);
+    }
+
+    public synchronized void drawEdges() {
+        application.setTextCalc(ts.toString());
+        application.setTextNrEdges(String.valueOf(koch.getNrOfEdges()));
         application.clearKochPanel();
-        
-       for(Edge e : edges){
-           application.drawEdge(e);
-       }
-       
+        ts2 = new TimeStamp();
+        ts2.setBegin("Drawing Start");
+
+        for (Edge e : edges) {
+            application.drawEdge(e);
+        }
+        ts2.setEnd("Drawing End");
+        application.setTextDraw(ts2.toString());
     }
 
     @Override
-    public void update(Observable o, Object arg) {
-        koch = (KochFractal)o;
-        edges.add((Edge)arg);
-        //drawEdges();
+    public synchronized void update(Observable o, Object arg) {
+        edges.add((Edge) arg);
     }
 }
