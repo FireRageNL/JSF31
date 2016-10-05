@@ -5,6 +5,9 @@
 package jsf31kochfractalfx;
 
 import calculate.*;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -57,7 +60,7 @@ public class JSF31KochFractalFX extends Application {
     private final int kpHeight = 500;
     
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws InterruptedException, ExecutionException {
         // Define grid pane
         GridPane grid;
         grid = new GridPane();
@@ -101,7 +104,13 @@ public class JSF31KochFractalFX extends Application {
         buttonIncreaseLevel.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                increaseLevelButtonActionPerformed(event);
+                try {
+                    increaseLevelButtonActionPerformed(event);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(JSF31KochFractalFX.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (ExecutionException ex) {
+                    Logger.getLogger(JSF31KochFractalFX.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         grid.add(buttonIncreaseLevel, 3, 6);
@@ -112,7 +121,13 @@ public class JSF31KochFractalFX extends Application {
         buttonDecreaseLevel.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                decreaseLevelButtonActionPerformed(event);
+                try {
+                    decreaseLevelButtonActionPerformed(event);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(JSF31KochFractalFX.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (ExecutionException ex) {
+                    Logger.getLogger(JSF31KochFractalFX.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         grid.add(buttonDecreaseLevel, 5, 6);
@@ -223,7 +238,7 @@ public class JSF31KochFractalFX extends Application {
         });
     }
     
-    private void increaseLevelButtonActionPerformed(ActionEvent event) {
+    private void increaseLevelButtonActionPerformed(ActionEvent event) throws InterruptedException, ExecutionException {
         if (currentLevel < 12) {
             // resetZoom();
             currentLevel++;
@@ -232,7 +247,7 @@ public class JSF31KochFractalFX extends Application {
         }
     } 
     
-    private void decreaseLevelButtonActionPerformed(ActionEvent event) {
+    private void decreaseLevelButtonActionPerformed(ActionEvent event) throws InterruptedException, ExecutionException {
         if (currentLevel > 1) {
             // resetZoom();
             currentLevel--;

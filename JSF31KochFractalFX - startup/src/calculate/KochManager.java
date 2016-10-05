@@ -6,8 +6,16 @@
 package calculate;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jsf31kochfractalfx.JSF31KochFractalFX;
 import timeutil.TimeStamp;
 
@@ -23,42 +31,58 @@ public class KochManager implements Observer {
     private int count;
     public TimeStamp ts;
     public TimeStamp ts2;
-
+    private ExecutorService pool;
+    
+    private Future<List<Edge>> fut1;
+    private Future<List<Edge>> fut2;
+    private Future<List<Edge>> fut3;
+    
+    private CyclicBarrier cb;
+    
     public KochManager(JSF31KochFractalFX object) {
         application = object;
         edges = new ArrayList<>();
         this.koch = new KochFractal();
+        pool =  Executors.newFixedThreadPool(3);
     }
 
-    public synchronized void count() {
+    public void count() throws InterruptedException, ExecutionException {
         count++;
         if (count >= 3) {
-            ts.setEnd("Calculating end");
-            application.requestDrawEdges();
+            System.out.println("OBSOLETE");
         }
     }
 
-    public synchronized void changeLevel(int level) {
+    public  void changeLevel(int level) throws InterruptedException, ExecutionException {
         edges.clear();
         koch.setLevel(level);
         count = 0;
         this.ts = new TimeStamp();
         ts.setBegin("Calculating start");
-
-        Thread bottomThread = new Thread(new GenerateBottom(this, new KochFractal(), koch.getLevel()));
-        bottomThread.start();
-        Thread leftThread = new Thread(new GenerateLeft(this, new KochFractal(), koch.getLevel()));
-        leftThread.start();
-        Thread rightThread = new Thread(new GenerateRight(this, new KochFractal(), koch.getLevel()));
-        rightThread.start();
-
+        cb = new CyclicBarrier(3, new Runnable(){
+            @Override
+            public void run(){
+                try {
+                    edges.addAll(fut1.get());
+                    edges.addAll(fut2.get());
+                    edges.addAll(fut3.get());
+                    ts.setEnd("Calculating end");
+                    application.requestDrawEdges();
+                } catch (InterruptedException | ExecutionException ex) {
+                    Logger.getLogger(KochManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        
+        
+        fut3 = pool.submit(new GenerateBottom(this,new KochFractal(),level,cb));
+        fut1 = pool.submit(new GenerateRight(this,new KochFractal(),level,cb));
+        fut2 = pool.submit(new GenerateLeft(this,new KochFractal(),level,cb));
+        System.out.println(cb.getParties() + " Parties");
+        System.out.println(cb.getNumberWaiting() + " Parties waiting");
     }
 
-    public synchronized void updateEdges(Edge e) {
-        edges.add(e);
-    }
-
-    public synchronized void drawEdges() {
+    public void drawEdges() {
         application.setTextCalc(ts.toString());
         application.setTextNrEdges(String.valueOf(koch.getNrOfEdges()));
         application.clearKochPanel();
@@ -73,7 +97,7 @@ public class KochManager implements Observer {
     }
 
     @Override
-    public synchronized void update(Observable o, Object arg) {
+    public void update(Observable o, Object arg) {
         edges.add((Edge) arg);
     }
 }

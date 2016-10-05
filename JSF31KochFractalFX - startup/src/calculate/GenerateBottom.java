@@ -5,34 +5,47 @@
  */
 package calculate;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutionException;
 
 /**
  *
  * @author roy_v
  */
-public class GenerateBottom implements Runnable, Observer {
+public class GenerateBottom implements Callable<List<Edge>>, Observer {
 
     private final KochManager km;
     private final KochFractal kf;
+    private List<Edge> edges;
+    private CyclicBarrier cb;
 
-    public GenerateBottom(KochManager manager, KochFractal fractal, int level) {
+    public GenerateBottom(KochManager manager, KochFractal fractal, int level, CyclicBarrier cb) {
         km = manager;
         this.kf = fractal;
         this.kf.setLevel(level);
         this.kf.addObserver(this);
+        this.cb = cb;
+        edges = new ArrayList<Edge>();
     }
 
     @Override
-    public void run() {
+    public List<Edge> call() throws BrokenBarrierException, InterruptedException {
         kf.generateBottomEdge();
-        km.count();
+        System.out.println("B:Klaar met genereeten");
+        cb.await();
+        System.out.println("B:+1");
+        return edges;
     }
 
     @Override
     public void update(Observable o, Object arg) {
-        km.updateEdges((Edge) arg);
+        edges.add((Edge) arg);
     }
 
 }
