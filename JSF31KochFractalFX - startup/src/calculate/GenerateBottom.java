@@ -12,7 +12,6 @@ import java.util.Observer;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ExecutionException;
 
 /**
  *
@@ -23,14 +22,12 @@ public class GenerateBottom implements Callable<List<Edge>>, Observer {
     private final KochManager km;
     private final KochFractal kf;
     private List<Edge> edges;
-    private CyclicBarrier cb;
 
-    public GenerateBottom(KochManager manager, KochFractal fractal, int level, CyclicBarrier cb) {
+    public GenerateBottom(KochManager manager, KochFractal fractal, int level) {
         km = manager;
         this.kf = fractal;
         this.kf.setLevel(level);
         this.kf.addObserver(this);
-        this.cb = cb;
         edges = new ArrayList<Edge>();
     }
 
@@ -38,7 +35,6 @@ public class GenerateBottom implements Callable<List<Edge>>, Observer {
     public List<Edge> call() throws BrokenBarrierException, InterruptedException {
         kf.generateBottomEdge();
         System.out.println("B:Klaar met genereeten");
-        cb.await();
         System.out.println("B:+1");
         return edges;
     }

@@ -12,7 +12,6 @@ import java.util.Observer;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ExecutionException;
 
 /**
  *
@@ -23,13 +22,11 @@ public class GenerateRight implements Callable<List<Edge>>, Observer {
     private KochManager km;
     private KochFractal kf;
     private List<Edge> edges;
-    private CyclicBarrier cb;
 
-    public GenerateRight(KochManager manager, KochFractal fractal, int level, CyclicBarrier cb) {
+    public GenerateRight(KochManager manager, KochFractal fractal, int level) {
         km = manager;
         kf = fractal;
         kf.setLevel(level);
-        this.cb = cb;
         kf.addObserver(this);
         edges = new ArrayList<Edge>();
     }
@@ -38,7 +35,6 @@ public class GenerateRight implements Callable<List<Edge>>, Observer {
     public List<Edge> call() throws InterruptedException, BrokenBarrierException {
         kf.generateRightEdge();
         System.out.println("R:Klaar met genereeten");
-        cb.await();
         System.out.println("R:+1");
         return edges;
     }

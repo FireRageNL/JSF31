@@ -12,7 +12,6 @@ import java.util.Observer;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ExecutionException;
 /**
  *
  * @author roy_v
@@ -22,12 +21,10 @@ public class GenerateLeft implements Callable<List<Edge>>, Observer {
     private final KochManager km;
     private final KochFractal kf;
     private List<Edge> edges;
-    private CyclicBarrier cb;
-    public  GenerateLeft(KochManager manager, KochFractal fractal, int level, CyclicBarrier cb) {
+    public  GenerateLeft(KochManager manager, KochFractal fractal, int level) {
         km = manager;
         this.kf = fractal;
         this.kf.setLevel(level);
-        this.cb = cb;
         this.kf.addObserver(this);
         edges = new ArrayList<Edge>();
     }
@@ -36,7 +33,6 @@ public class GenerateLeft implements Callable<List<Edge>>, Observer {
     public List<Edge> call() throws InterruptedException, BrokenBarrierException{
         kf.generateLeftEdge();
         System.out.println("L:Klaar met genereeten");
-        cb.await();
         System.out.println("L:+1");
         return edges;
     }
