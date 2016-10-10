@@ -21,19 +21,22 @@ public class GenerateLeft implements Callable<List<Edge>>, Observer {
     private final KochManager km;
     private final KochFractal kf;
     private List<Edge> edges;
-    public  GenerateLeft(KochManager manager, KochFractal fractal, int level) {
+    private CyclicBarrier cb;
+    public  GenerateLeft(KochManager manager, KochFractal fractal, int level, CyclicBarrier cb) {
         km = manager;
         this.kf = fractal;
         this.kf.setLevel(level);
         this.kf.addObserver(this);
+        this.cb = cb;
         edges = new ArrayList<Edge>();
     }
 
     @Override
     public List<Edge> call() throws InterruptedException, BrokenBarrierException{
         kf.generateLeftEdge();
-        System.out.println("L:Klaar met genereeten");
-        System.out.println("L:+1");
+        if(km.getCyclicBarrier().await() == 0){
+            return edges;
+        }
         return edges;
     }
 

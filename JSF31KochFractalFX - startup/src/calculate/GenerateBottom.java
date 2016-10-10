@@ -22,20 +22,23 @@ public class GenerateBottom implements Callable<List<Edge>>, Observer {
     private final KochManager km;
     private final KochFractal kf;
     private List<Edge> edges;
+    private CyclicBarrier cb;
 
-    public GenerateBottom(KochManager manager, KochFractal fractal, int level) {
+    public GenerateBottom(KochManager manager, KochFractal fractal, int level, CyclicBarrier cb) {
         km = manager;
         this.kf = fractal;
         this.kf.setLevel(level);
         this.kf.addObserver(this);
+        this.cb = cb;
         edges = new ArrayList<Edge>();
     }
 
     @Override
     public List<Edge> call() throws BrokenBarrierException, InterruptedException {
         kf.generateBottomEdge();
-        System.out.println("B:Klaar met genereeten");
-        System.out.println("B:+1");
+        if(km.getCyclicBarrier().await() == 0){
+            return edges;
+        }
         return edges;
     }
 
