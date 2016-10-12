@@ -52,4 +52,8 @@ public class Ball {
     public boolean isLeavingCs() {
         return xPos == maxCsX;
     }
+    
+    public boolean isInCs(){
+        return (xPos > minCsX && xPos < maxCsX);
+    }
 }
