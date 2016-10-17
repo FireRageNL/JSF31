@@ -14,83 +14,112 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author daan
  */
 public class BallMonitor {
-    
-    private int writersActive=0;
-    private int readersActive=0;
-    private int readersWaiting=0;
-    private int writersWaiting=0;
+
+    private int writersActive = 0;
+    private int readersActive = 0;
+    private int readersWaiting = 0;
+    private int writersWaiting = 0;
     private Condition okToRead;
     private Condition okToWrite;
     private Lock monLock;
-    
-    public BallMonitor(){
+
+    public BallMonitor() {
         monLock = new ReentrantLock();
         okToRead = monLock.newCondition();
         okToWrite = monLock.newCondition();
-        
+
     }
-    
-    public void enterReader() throws InterruptedException{
+
+    public void enterReader() throws InterruptedException {
         monLock.lock();
-        try{
-            while(writersActive != 0){
+        try {
+            while (writersActive != 0) {
                 readersWaiting++;
                 okToRead.await();
                 readersWaiting--;
             }
-         readersActive++;
-        }
-        finally{
+            readersActive++;
+        } finally {
             monLock.unlock();
-            System.out.println("Readers: "+readersActive+" writers: "+writersActive);
+            System.out.println("Readers: " + readersWaiting + " writers: " + writersWaiting);
         }
     }
-    
-    public void exitReader(){
+
+    public void exitReader() {
         monLock.lock();
-        try{
+        try {
             readersActive--;
-            if(readersActive == 0){
+            if (readersActive == 0) {
                 okToWrite.signal();
             }
-        }
-        finally{
+        } finally {
             monLock.unlock();
-            System.out.println("Readers: "+readersActive+" writers: "+writersActive);
+            System.out.println("Readers: " + readersWaiting + " writers: " + writersWaiting);
         }
     }
-    
-    public void enterWriter() throws InterruptedException{
+
+    public void enterWriter() throws InterruptedException {
         monLock.lock();
-        try{
-            while(writersActive > 0 || readersActive > 0){
+        try {
+            while (writersActive > 0 || readersActive > 0) {
                 writersWaiting++;
                 okToWrite.await();
                 writersWaiting--;
             }
-         writersActive++;
-        }
-        finally{
+            writersActive++;
+        } finally {
             monLock.unlock();
-            System.out.println("Readers: "+readersActive+" writers: "+writersActive);
+            System.out.println("Readers: " + readersWaiting + " writers: " + writersWaiting);
         }
     }
-    
-    public void exitWriter(){
+
+    public void exitWriter() {
         monLock.lock();
-        try{
+        try {
             writersActive--;
-            if(readersWaiting > 0 && writersWaiting <= 0){
+            if (readersWaiting > 0 && writersWaiting <= 0) {
                 okToRead.signalAll();
-            }
-            else{
+            } else {
                 okToWrite.signal();
             }
-        }
-        finally{
+        } finally {
             monLock.unlock();
-            System.out.println("Readers: "+readersActive+" writers: "+writersActive);
+            System.out.println("Readers: " + readersWaiting + " writers: " + writersWaiting);
         }
+    }
+
+    public void writerInterrupted(Ball ball) {
+        monLock.lock();
+        try {
+            if (ball.isEnteringCs()) {
+                writersWaiting--;
+            } else if (ball.isInCs()) {
+                writersActive--;
+            }
+            if (writersWaiting == 0 && writersActive == 0) {
+                okToRead.signalAll();
+            } else if (writersWaiting > 0) {
+                okToWrite.signal();
+            }
+        } finally {
+            monLock.unlock();
+        }
+
+    }
+
+    public void readerInterrupted(Ball ball) {
+        monLock.lock();
+        try {
+            if (ball.isEnteringCs()) {
+                readersWaiting--;
+            } else if (ball.isInCs()) {
+                readersActive--;
+            }
+
+        } finally {
+            monLock.unlock();
+        }
+
     }
 
 }

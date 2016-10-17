@@ -24,30 +24,27 @@ public class BallRunnable implements Runnable {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                if(ball.getColor() == Color.BLUE && ball.isEnteringCs()){
+                if (ball.getColor() == Color.BLUE && ball.isEnteringCs()) {
                     bm.enterWriter();
-                }
-                else if(ball.getColor() == Color.RED && ball.isEnteringCs()){
+                } else if (ball.getColor() == Color.RED && ball.isEnteringCs()) {
                     bm.enterReader();
-                }
-                else if(ball.getColor() == Color.BLUE && ball.isLeavingCs()){
+                } else if (ball.getColor() == Color.BLUE && ball.isLeavingCs()) {
                     bm.exitWriter();
-                }
-                else if(ball.getColor() == Color.RED && ball.isLeavingCs()){
+                } else if (ball.getColor() == Color.RED && ball.isLeavingCs()) {
                     bm.exitReader();
                 }
-                
+
                 ball.move();
-                   
+
                 Thread.sleep(ball.getSpeed());
-                
+
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
-                if(ball.getColor() == Color.RED && ball.isInCs()){
-                    bm.exitReader();
+                if (ball.getColor() == Color.RED && ball.isInCs()) {
+                    bm.readerInterrupted(ball);
                 }
-                if(ball.getColor() == Color.BLUE && ball.isInCs()){
-                    bm.exitWriter();
+                if (ball.getColor() == Color.BLUE) {
+                    bm.writerInterrupted(ball);
                 }
             }
         }
