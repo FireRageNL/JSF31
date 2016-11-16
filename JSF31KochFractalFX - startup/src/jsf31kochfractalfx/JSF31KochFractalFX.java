@@ -81,7 +81,7 @@ public class JSF31KochFractalFX extends Application {
         // grid.setGridLinesVisible(true);
         // Drawing panel for Koch fractal
         kochPanel = new Canvas(kpWidth, kpHeight);
-        grid.add(kochPanel, 0, 3, 25, 1);
+        grid.add(kochPanel, 0, 4, 25, 1);
 
         // Labels to present number of edges for Koch fractal
         labelNrEdges = new Label("Nr edges:");
@@ -159,22 +159,22 @@ public class JSF31KochFractalFX extends Application {
         labelProgressBottomEdge = new Label();
         
         //Bar Left
-        grid.add(new Label("Left:"), 0, 8);
-        grid.add(progressBarLeft, 3, 8);
-        grid.add(new Label("Edges calculated:"), 5, 8);
-        grid.add(labelProgressLeftEdge, 6, 8);
+        grid.add(new Label("Left:"), 18, 1);
+        grid.add(progressBarLeft, 19, 1);
+        grid.add(new Label("Edges calculated:"), 20, 1);
+        grid.add(labelProgressLeftEdge, 21, 1);
 
         //Bar Right
-        grid.add(new Label("Right:"), 0, 9);
-        grid.add(progressBarRight, 3, 9);
-        grid.add(new Label("Edges calculated:"), 5, 9);
-        grid.add(labelProgressRightEdge, 6, 9);
+        grid.add(new Label("Right:"), 18, 2);
+        grid.add(progressBarRight, 19, 2);
+        grid.add(new Label("Edges calculated:"), 20, 2);
+        grid.add(labelProgressRightEdge, 21, 2);
 
         //Bar Bottom
-        grid.add(new Label("Bottom:"), 0, 10);
-        grid.add(progressBarBottom, 3, 10);
-        grid.add(new Label("Edges calculated:"), 5, 10);
-        grid.add(labelProgressBottomEdge, 6, 10);
+        grid.add(new Label("Bottom:"), 18, 3);
+        grid.add(progressBarBottom, 19, 3);
+        grid.add(new Label("Edges calculated:"), 20, 3);
+        grid.add(labelProgressBottomEdge, 21, 3);
 
         // Add mouse clicked event to Koch panel
         kochPanel.addEventHandler(MouseEvent.MOUSE_CLICKED,

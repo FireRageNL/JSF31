@@ -47,8 +47,23 @@ public class KochManager implements Observer {
             drawEdges();
         }
     }
-
+    
+    
+    public void cancelTasks(){
+        if(left != null){
+            left.cancel();
+        }
+        if(right != null){
+            right.cancel();
+        }
+        if(bottom != null){
+            bottom.cancel();
+        }
+    }
     public void changeLevel(int level) throws InterruptedException, ExecutionException {
+        cancelTasks();
+        edges.clear();
+        application.clearKochPanel();
         koch.setLevel(level);
         count = 0;
         this.ts = new TimeStamp();
