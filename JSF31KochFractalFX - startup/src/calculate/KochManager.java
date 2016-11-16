@@ -6,14 +6,15 @@
 package calculate;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import jsf31kochfractalfx.JSF31KochFractalFX;
 import timeutil.TimeStamp;
 
@@ -30,22 +31,20 @@ public class KochManager implements Observer {
     public TimeStamp ts;
     public TimeStamp ts2;
     private ExecutorService pool;
-    private CyclicBarrier bar;
-    private Future<List<Edge>> fut1;
-    private Future<List<Edge>> fut2;
-    private Future<List<Edge>> fut3;
+    private Task left;
+    private Task right;
+    private Task bottom;
 
     public KochManager(JSF31KochFractalFX object) {
         application = object;
         edges = new ArrayList<>();
         this.koch = new KochFractal();
-        bar = new CyclicBarrier(3);
     }
 
-    public void count() throws InterruptedException, ExecutionException {
+    public void count() {
         count++;
         if (count >= 3) {
-            System.out.println("OBSOLETE");
+            drawEdges();
         }
     }
 
@@ -53,15 +52,48 @@ public class KochManager implements Observer {
         koch.setLevel(level);
         count = 0;
         this.ts = new TimeStamp();
+        application.progressBarBottom.progressProperty().unbind();
+        application.progressBarLeft.progressProperty().unbind();
+        application.progressBarRight.progressProperty().unbind();
+        application.labelProgressBottomEdge.textProperty().unbind();
+        application.labelProgressLeftEdge.textProperty().unbind();
+        application.labelProgressRightEdge.textProperty().unbind();
         ts.setBegin("Calculating start");
         pool = Executors.newFixedThreadPool(3);
-        fut3 = pool.submit(new GenerateBottom(this, new KochFractal(), level, bar));
-        fut1 = pool.submit(new GenerateRight(this, new KochFractal(), level, bar));
-        fut2 = pool.submit(new GenerateLeft(this, new KochFractal(), level, bar));
+        left = new GenerateLeft(this, new KochFractal(), level,application);
+        right = new GenerateRight(this, new KochFractal(), level,application);
+        bottom = new GenerateBottom(this, new KochFractal(), level,application);
+        left.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                count();
+            }
 
+        });
+        right.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                count();
+            }
+
+        });
+        bottom.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED, new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent event) {
+                count();
+            }
+
+        });
+        application.progressBarBottom.progressProperty().bind(bottom.progressProperty());
+        application.progressBarLeft.progressProperty().bind(left.progressProperty());
+        application.progressBarRight.progressProperty().bind(right.progressProperty());
+        application.labelProgressBottomEdge.textProperty().bind(bottom.messageProperty());
+        application.labelProgressLeftEdge.textProperty().bind(left.messageProperty());
+        application.labelProgressRightEdge.textProperty().bind(right.messageProperty());
+        pool.submit(left);
+        pool.submit(right);
+        pool.submit(bottom);
         ts.setEnd("Calculating end");
-        application.requestDrawEdges();
-        pool.shutdown();
     }
 
     public void drawEdges() {
@@ -85,18 +117,13 @@ public class KochManager implements Observer {
         edges.add((Edge) arg);
     }
 
-    public CyclicBarrier getCyclicBarrier() {
-        return bar;
-    }
-
     private void updateEdges() {
-        try{
-        edges.addAll(fut1.get());
-        edges.addAll(fut2.get());
-        edges.addAll(fut3.get());
-        }
-        catch(InterruptedException | ExecutionException ex){
-            System.out.println(ex.getMessage());
+        try {
+            edges.addAll((Collection<? extends Edge>) left.getValue());
+            edges.addAll((Collection<? extends Edge>) right.getValue());
+            edges.addAll((Collection<? extends Edge>) bottom.getValue());
+        } catch (Exception ex) {
+            System.out.println("Error: " + ex.getMessage());
         }
     }
 }

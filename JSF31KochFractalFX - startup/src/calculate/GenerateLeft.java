@@ -9,40 +9,39 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CyclicBarrier;
+import javafx.concurrent.Task;
+import jsf31kochfractalfx.JSF31KochFractalFX;
 /**
  *
  * @author roy_v
  */
-public class GenerateLeft implements Callable<List<Edge>>, Observer {
+public class GenerateLeft extends Task<List<Edge>> implements Observer {
 
     private final KochManager km;
     private final KochFractal kf;
     private List<Edge> edges;
-    private CyclicBarrier cb;
-    public  GenerateLeft(KochManager manager, KochFractal fractal, int level, CyclicBarrier cb) {
+    private final JSF31KochFractalFX app;
+
+    public  GenerateLeft(KochManager manager, KochFractal fractal, int level,JSF31KochFractalFX application) {
         km = manager;
         this.kf = fractal;
         this.kf.setLevel(level);
         this.kf.addObserver(this);
-        this.cb = cb;
         edges = new ArrayList<Edge>();
+        app = application;
     }
 
     @Override
-    public List<Edge> call() throws InterruptedException, BrokenBarrierException{
+    public List<Edge> call() {
         kf.generateLeftEdge();
-        if(km.getCyclicBarrier().await() == 0){
-            return edges;
-        }
         return edges;
     }
 
     @Override
     public void update(Observable o, Object arg) {
         edges.add((Edge) arg);
+        updateProgress(edges.size(), kf.getNrOfEdges() / 3);
+        updateMessage(Integer.toString(edges.size()));
     }
 
 }
