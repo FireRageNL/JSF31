@@ -209,7 +209,7 @@ public class JSF31KochFractalFX extends Application {
         kochManager.changeLevel(currentLevel);
         // Create the scene and add the grid pane
         Group root = new Group();
-        Scene scene = new Scene(root, kpWidth + 50, kpHeight + 270);
+        Scene scene = new Scene(root, kpWidth + 350, kpHeight + 270);
         root.getChildren().add(grid);
 
         // Define title and assign the scene for main window
