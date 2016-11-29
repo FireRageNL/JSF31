@@ -57,6 +57,8 @@ public class KochManager implements Observer {
         edges = new ArrayList<>();
         this.koch = new KochFractal();
     }
+    
+    public void readFileMap
 
     public void loadTxtNonBuffer() {
         application.clearKochPanel();

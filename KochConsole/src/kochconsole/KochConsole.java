@@ -12,6 +12,8 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
 import java.io.*;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import timeutil.TimeStamp;
@@ -32,6 +34,49 @@ public class KochConsole implements Observer {
         //app.doTheStuffWithOutputStreams();
         app.doTheStuffWithNonBufferWriters();
         //app.doTheStuffWithBufferedWriters();
+        //app.doTheStuffWithMemoryMappedfile();
+    }
+
+    public void doTheStuffWithMemoryMappedfile() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the level to be generated: ");
+        int level = scanner.nextInt();
+        if (level > 12) {
+            level = 12;
+            System.out.println("Levels larger than 12 are not supported! Level is set as 12!");
+        }
+        KochFractal kf = new KochFractal();
+        kf.addObserver(this);
+        kf.setLevel(level);
+        System.out.println("Generating " + kf.getNrOfEdges() + " Edges...");
+        kf.generateBottomEdge();
+        System.out.println("33% complete!");
+        kf.generateLeftEdge();
+        System.out.println("66% complete!");
+        kf.generateRightEdge();
+        System.out.println("100% Complete, now writing file!");
+        TimeStamp t = new TimeStamp();
+        t.setBegin("Begin write with memory mapped file");
+        int numberOfBytes = kf.getNrOfEdges() * 4 * 8;
+        try{
+            RandomAccessFile raf = new RandomAccessFile("edge.ram","rw");
+            MappedByteBuffer mbf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, numberOfBytes);
+            for(Edge e : ret){
+                mbf.putDouble(e.X1);
+                mbf.putDouble(e.Y1);
+                mbf.putDouble(e.X2);
+                mbf.putDouble(e.Y2);
+            }
+            raf.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(KochConsole.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(KochConsole.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        t.setEnd("End of writing memory mapped file");
+        System.out.println(t.toString());
+        
+        
     }
 
     public void doTheStuffWithBufferedWriters() {
@@ -54,12 +99,12 @@ public class KochConsole implements Observer {
         System.out.println("100% Complete, now writing file!");
         TimeStamp t = new TimeStamp();
         t.setBegin("Begin write with buffer to txt");
-        try{
+        try {
             FileWriter fw = new FileWriter("edges.txt");
-			BufferedWriter bw = new BufferedWriter(fw);
-                    for(Edge e : ret){
-                        bw.write(String.valueOf(e.X1) + ";" + String.valueOf(e.Y1) + ";" + String.valueOf(e.X2) + ";" + String.valueOf(e.Y2) + ";" + e.color.toString());
-                    }
+            BufferedWriter bw = new BufferedWriter(fw);
+            for (Edge e : ret) {
+                bw.write(String.valueOf(e.X1) + ";" + String.valueOf(e.Y1) + ";" + String.valueOf(e.X2) + ";" + String.valueOf(e.Y2) + ";" + e.color.toString());
+            }
         } catch (IOException ex) {
             Logger.getLogger(KochConsole.class.getName()).log(Level.SEVERE, null, ex);
         }
