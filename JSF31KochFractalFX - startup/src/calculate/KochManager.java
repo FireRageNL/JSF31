@@ -57,14 +57,15 @@ public class KochManager implements Observer {
         edges = new ArrayList<>();
         this.koch = new KochFractal();
     }
-    
-    public void readFileMap
 
     public void loadTxtNonBuffer() {
+
         application.clearKochPanel();
         edges = new ArrayList();
         TimeStamp t = new TimeStamp();
-        t.setBegin("Start measure");
+
+        t.setBegin(
+                "Start measure");
         try {
             Scanner input;
             System.out.print(PATHTXT);
@@ -85,7 +86,9 @@ public class KochManager implements Observer {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        t.setEnd("End Measuring");
+
+        t.setEnd(
+                "End Measuring");
         System.out.println(t.toString());
         for (Edge e : edges) {
             application.drawEdge(e);
@@ -116,8 +119,10 @@ public class KochManager implements Observer {
         } finally {
             try {
                 file.close();
+
             } catch (IOException ex) {
-                Logger.getLogger(KochManager.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(KochManager.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         }
         t.setEnd("End Measuring");
@@ -146,8 +151,10 @@ public class KochManager implements Observer {
         } finally {
             try {
                 file.close();
+
             } catch (IOException ex) {
-                Logger.getLogger(KochManager.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(KochManager.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -167,18 +174,26 @@ public class KochManager implements Observer {
             System.out.println(t.toString());
             for (Edge e : edges) {
                 application.drawEdge(e);
+
             }
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(KochManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(KochManager.class
+                    .getName()).log(Level.SEVERE, null, ex);
+
         } catch (IOException ex) {
-            Logger.getLogger(KochManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(KochManager.class
+                    .getName()).log(Level.SEVERE, null, ex);
+
         } catch (ClassNotFoundException ex) {
-            Logger.getLogger(KochManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(KochManager.class
+                    .getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 fin.close();
+
             } catch (IOException ex) {
-                Logger.getLogger(KochManager.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(KochManager.class
+                        .getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
