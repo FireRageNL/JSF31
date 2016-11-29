@@ -7,12 +7,16 @@ package calculate;
 
 import java.awt.Color;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Observable;
@@ -35,9 +39,8 @@ import timeutil.TimeStamp;
  */
 public class KochManager implements Observer {
 
-    
-    private String PATH = "C:\\Users\\daan\\Desktop\\LinuxApps\\JSF31\\KochConsole\\edges.tmp";
-    private String PATHTXT = "C:\\Users\\daan\\Desktop\\LinuxApps\\JSF31\\KochConsole\\edges.txt";
+    private String PATH = "..\\KochConsole\\edges.tmp";
+    private String PATHTXT = "..\\KochConsole\\edges.txt";
     private JSF31KochFractalFX application;
     private KochFractal koch;
     private ArrayList<Edge> edges;
@@ -55,11 +58,11 @@ public class KochManager implements Observer {
         this.koch = new KochFractal();
     }
 
-    public void loadTxtNonBuffer(){
+    public void loadTxtNonBuffer() {
         application.clearKochPanel();
         edges = new ArrayList();
         TimeStamp t = new TimeStamp();
-            t.setBegin("Start measure"); 
+        t.setBegin("Start measure");
         try {
             Scanner input;
             System.out.print(PATHTXT);
@@ -67,33 +70,62 @@ public class KochManager implements Observer {
 
             input = new Scanner(file);
 
-               
             while (input.hasNextLine()) {
                 String line = input.nextLine();
                 String[] data = line.split(";");
-                
-                    Edge e = new Edge(Double.parseDouble(data[0]),Double.parseDouble(data[1]),Double.parseDouble(data[2]),Double.parseDouble(data[3]),javafx.scene.paint.Color.BLUE);
+
+                Edge e = new Edge(Double.parseDouble(data[0]), Double.parseDouble(data[1]), Double.parseDouble(data[2]), Double.parseDouble(data[3]), javafx.scene.paint.Color.BLUE);
                 edges.add(e);
-                
-                
+
             }
             input.close();
-            
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
         t.setEnd("End Measuring");
-            System.out.println(t.toString());
+        System.out.println(t.toString());
         for (Edge e : edges) {
-                application.drawEdge(e);
+            application.drawEdge(e);
+        }
+    }
+
+    public void loadTxtWithBuffer() {
+        InputStream file = null;
+        TimeStamp t = new TimeStamp();
+        try {
+            t.setBegin("Start measure");
+            FileReader fread = new FileReader(PATHTXT);
+            BufferedReader in = new BufferedReader(fread);
+            Scanner input = new Scanner(in);
+
+            while (input.hasNextLine()) {
+                String line = input.nextLine();
+                String[] data = line.split(";");
+
+                Edge e = new Edge(Double.parseDouble(data[0]), Double.parseDouble(data[1]), Double.parseDouble(data[2]), Double.parseDouble(data[3]), javafx.scene.paint.Color.BLUE);
+                edges.add(e);
+
             }
+            input.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                file.close();
+            } catch (IOException ex) {
+                Logger.getLogger(KochManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        t.setEnd("End Measuring");
+        System.out.println(t.toString());
+        for (Edge e : edges) {
+            application.drawEdge(e);
+        }
     }
-    
-    public void loadTxtWithBuffer(){
-        
-    }
-    
-    public void loadObjectBufferedFractal(){
+
+    public void loadObjectBufferedFractal() {
         InputStream file = null;
         try {
             TimeStamp t = new TimeStamp();
