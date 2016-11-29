@@ -5,6 +5,7 @@
 package jsf31kochfractalfx;
 
 import calculate.*;
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,6 +24,7 @@ import javafx.scene.input.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import timeutil.TimeStamp;
 
 /**
  *
@@ -105,6 +107,10 @@ public class JSF31KochFractalFX extends Application {
         labelLevel = new Label("Level: " + currentLevel);
         grid.add(labelLevel, 0, 6);
 
+        
+        
+        
+        
         // Button to increase level of Koch fractal
         Button buttonIncreaseLevel = new Button();
         buttonIncreaseLevel.setText("Increase Level");
@@ -202,6 +208,21 @@ public class JSF31KochFractalFX extends Application {
             }
         });
 
+        
+        Button buttonLoad = new Button();
+        buttonLoad.setText("Load");
+        buttonLoad.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent event){
+                
+                    //kochManager.loadObjectNonBufferedFractal();
+                    //kochManager.loadObjectBufferedFractal();
+                    kochManager.loadTxtNonBuffer();
+                
+            }
+        });
+        grid.add(buttonLoad, 25, 1);
+        
         // Create Koch manager and set initial level
         resetZoom();
         kochManager = new KochManager(this);
@@ -212,6 +233,10 @@ public class JSF31KochFractalFX extends Application {
         Scene scene = new Scene(root, kpWidth + 350, kpHeight + 270);
         root.getChildren().add(grid);
 
+        
+        
+        
+        
         // Define title and assign the scene for main window
         primaryStage.setTitle("Koch Fractal");
         primaryStage.setScene(scene);

@@ -4,6 +4,7 @@
  */
 package kochconsole;
 
+import calculate.Edge;
 import java.util.Observable;
 import javafx.scene.paint.Color;
 
