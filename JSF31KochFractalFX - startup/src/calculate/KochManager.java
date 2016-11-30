@@ -16,7 +16,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.RandomAccessFile;
 import java.io.Reader;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Observable;
@@ -41,6 +44,7 @@ public class KochManager implements Observer {
 
     private String PATH = "..\\KochConsole\\edges.tmp";
     private String PATHTXT = "..\\KochConsole\\edges.txt";
+    private String PATHRAM = "..\\KochConsole\\edges.ram";
     private JSF31KochFractalFX application;
     private KochFractal koch;
     private ArrayList<Edge> edges;
@@ -56,6 +60,30 @@ public class KochManager implements Observer {
         application = object;
         edges = new ArrayList<>();
         this.koch = new KochFractal();
+    }
+
+    public void loadMemoryMappedFile() {
+        application.clearKochPanel();
+        edges = new ArrayList();
+        TimeStamp t = new TimeStamp();
+        t.setBegin("Start measure");
+        try {
+            File file = new File(PATHRAM);
+            FileChannel fchannel = new RandomAccessFile(file, "r").getChannel();
+            MappedByteBuffer mbb = fchannel.map(FileChannel.MapMode.READ_ONLY, 0, fchannel.size());
+            while (mbb.hasRemaining()) {
+                Edge e = new Edge(mbb.getDouble(), mbb.getDouble(), mbb.getDouble(), mbb.getDouble(), javafx.scene.paint.Color.RED);
+                edges.add(e);
+            }
+            fchannel.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        t.setEnd("End measure");
+        System.out.println(t.toString());
+        for (Edge e : edges) {
+            application.drawEdge(e);
+        }
     }
 
     public void loadTxtNonBuffer() {

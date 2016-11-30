@@ -32,9 +32,9 @@ public class KochConsole implements Observer {
     public static void main(String[] args) throws FileNotFoundException {
         KochConsole app = new KochConsole();
         //app.doTheStuffWithOutputStreams();
-        app.doTheStuffWithNonBufferWriters();
+        //app.doTheStuffWithNonBufferWriters();
         //app.doTheStuffWithBufferedWriters();
-        //app.doTheStuffWithMemoryMappedfile();
+        app.doTheStuffWithMemoryMappedfile();
     }
 
     public void doTheStuffWithMemoryMappedfile() {
@@ -59,7 +59,7 @@ public class KochConsole implements Observer {
         t.setBegin("Begin write with memory mapped file");
         int numberOfBytes = kf.getNrOfEdges() * 4 * 8;
         try{
-            RandomAccessFile raf = new RandomAccessFile("edge.ram","rw");
+            RandomAccessFile raf = new RandomAccessFile("edges.ram","rw");
             MappedByteBuffer mbf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, numberOfBytes);
             for(Edge e : ret){
                 mbf.putDouble(e.X1);

@@ -217,7 +217,8 @@ public class JSF31KochFractalFX extends Application {
                 
                     //kochManager.loadObjectNonBufferedFractal();
                     //kochManager.loadObjectBufferedFractal();
-                    kochManager.loadTxtNonBuffer();
+                    //kochManager.loadTxtNonBuffer();
+                    kochManager.loadMemoryMappedFile();
                 
             }
         });

@@ -21,3 +21,5 @@ hs_err_pid*
 SuchConsoleVeryArguements/nbproject/private/private.xml
 /KochConsole/nbproject/private/
 *.zip
+KochConsole/edges.txt
+*.ram
