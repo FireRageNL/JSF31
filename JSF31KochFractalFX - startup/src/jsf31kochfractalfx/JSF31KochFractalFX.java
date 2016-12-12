@@ -70,7 +70,7 @@ public class JSF31KochFractalFX extends Application {
     public ProgressBar progressBarBottom;
 
     @Override
-    public void start(Stage primaryStage) throws InterruptedException, ExecutionException {
+    public void start(Stage primaryStage) throws InterruptedException, ExecutionException, IOException {
         // Define grid pane
         GridPane grid;
         grid = new GridPane();

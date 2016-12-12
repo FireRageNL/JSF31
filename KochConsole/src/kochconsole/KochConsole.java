@@ -14,8 +14,12 @@ import java.util.Scanner;
 import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import sun.nio.ch.DirectBuffer;
 import timeutil.TimeStamp;
 
 /**
@@ -67,13 +71,20 @@ public class KochConsole implements Observer {
                 mbf.putDouble(e.X2);
                 mbf.putDouble(e.Y2);
             }
-            raf.close();
-            File toRename = new File("edge.ram");
-            File newName = new File("edges.ram");
-            if (newName.exists()) {
-                newName.delete();
+            unmap(mbf);
+            Path p = Paths.get("edge.ram");
+            Path p2 = Paths.get("edger.ram");
+            Path p3 = Paths.get("edges.ram");
+            if (Files.exists(p3)) {
+                Files.delete(p3);
+
             }
-            toRename.renameTo(newName);
+            if (Files.exists(p2)) {
+                Files.delete(p2);
+
+            }
+            Files.copy(p, p.resolveSibling("edger.ram"));
+            Files.move(p2, p2.resolveSibling("edges.ram"));
         } catch (FileNotFoundException ex) {
             Logger.getLogger(KochConsole.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -190,6 +201,11 @@ public class KochConsole implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         ret.add((Edge) arg);
+    }
+
+    public static void unmap(MappedByteBuffer buffer) {
+        sun.misc.Cleaner cleaner = ((DirectBuffer) buffer).cleaner();
+        cleaner.clean();
     }
 
 }

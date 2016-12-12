@@ -82,7 +82,15 @@ public class KochManager implements Observer {
     }
 
     public void loadMemoryMappedFile() {
-        application.clearKochPanel();
+        new Thread(new Runnable(){
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1500);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(KochManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                application.clearKochPanel();
         edges = new ArrayList();
         TimeStamp t = new TimeStamp();
         t.setBegin("Start measure");
@@ -109,6 +117,9 @@ public class KochManager implements Observer {
             }
 
         });
+            }
+        }).start();
+        
 
     }
 
