@@ -20,8 +20,16 @@ import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
@@ -30,6 +38,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
@@ -45,6 +54,7 @@ public class KochManager implements Observer {
     private String PATH = "..\\KochConsole\\edges.tmp";
     private String PATHTXT = "..\\KochConsole\\edges.txt";
     private String PATHRAM = "..\\KochConsole\\edges.ram";
+    private String PATHFOLDER = "..\\KochConsole\\";
     private JSF31KochFractalFX application;
     private KochFractal koch;
     private ArrayList<Edge> edges;
@@ -55,11 +65,90 @@ public class KochManager implements Observer {
     private Task left;
     private Task right;
     private Task bottom;
+    private WatchService watchService;
+    private Path folder;
 
     public KochManager(JSF31KochFractalFX object) {
         application = object;
         edges = new ArrayList<>();
         this.koch = new KochFractal();
+//        try {
+//            checkForFileChange();
+//        } catch (IOException ex) {
+//            Logger.getLogger(KochManager.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+    }
+
+    public void checkForFileChange() throws IOException {
+        folder = Paths.get(PATHFOLDER);
+
+// Create a new Watch Service
+        watchService = FileSystems.getDefault().newWatchService();
+
+// Register events
+        folder.register(watchService,
+                StandardWatchEventKinds.ENTRY_CREATE,
+                StandardWatchEventKinds.ENTRY_MODIFY,
+                StandardWatchEventKinds.ENTRY_DELETE);
+        new Runnable() {
+            @Override
+            public void run() {
+                for (;;) {
+
+                    WatchKey key;
+
+                    try {
+                        System.out.println("Waiting for key to be signalled...");
+
+                        key = watchService.take();
+
+                    } catch (InterruptedException ex) {
+
+                        System.out.println("Interrupted Exception");
+
+                        return;
+
+                    }
+
+                    List<WatchEvent<?>> eventList = key.pollEvents();
+
+                    System.out.println("Process the pending events for the key: " + eventList.size());
+
+                    for (WatchEvent<?> genericEvent : eventList) {
+
+                        WatchEvent.Kind<?> eventKind = genericEvent.kind();
+
+                        System.out.println("Event kind: " + eventKind);
+
+                        if (eventKind == StandardWatchEventKinds.OVERFLOW) {
+
+                            continue; // pending events for loop
+
+                        } else if (eventKind == StandardWatchEventKinds.ENTRY_CREATE) {
+                            loadMemoryMappedFile();
+                        }
+                        System.out.println("File name: ");
+
+                    }
+
+                    boolean validKey = key.reset();
+
+                    System.out.println("Key reset");
+
+                    System.out.println("");
+
+                    if (!validKey) {
+
+                        System.out.println("Invalid key");
+
+                        break; // infinite for loop
+
+                    }
+
+                }
+            }
+
+        }.run();
     }
 
     public void loadMemoryMappedFile() {
@@ -81,9 +170,16 @@ public class KochManager implements Observer {
         }
         t.setEnd("End measure");
         System.out.println(t.toString());
-        for (Edge e : edges) {
-            application.drawEdge(e);
-        }
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                for (Edge e : edges) {
+                    application.drawEdge(e);
+                }
+            }
+
+        });
+
     }
 
     public void loadTxtNonBuffer() {
