@@ -58,16 +58,22 @@ public class KochConsole implements Observer {
         TimeStamp t = new TimeStamp();
         t.setBegin("Begin write with memory mapped file");
         int numberOfBytes = kf.getNrOfEdges() * 4 * 8;
-        try{
-            RandomAccessFile raf = new RandomAccessFile("edges.ram","rw");
+        try {
+            RandomAccessFile raf = new RandomAccessFile("edge.ram", "rw");
             MappedByteBuffer mbf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, numberOfBytes);
-            for(Edge e : ret){
+            for (Edge e : ret) {
                 mbf.putDouble(e.X1);
                 mbf.putDouble(e.Y1);
                 mbf.putDouble(e.X2);
                 mbf.putDouble(e.Y2);
             }
             raf.close();
+            File toRename = new File("edge.ram");
+            File newName = new File("edges.ram");
+            if (newName.exists()) {
+                newName.delete();
+            }
+            toRename.renameTo(newName);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(KochConsole.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -75,8 +81,7 @@ public class KochConsole implements Observer {
         }
         t.setEnd("End of writing memory mapped file");
         System.out.println(t.toString());
-        
-        
+
     }
 
     public void doTheStuffWithBufferedWriters() {
