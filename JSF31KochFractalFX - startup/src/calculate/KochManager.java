@@ -53,8 +53,8 @@ public class KochManager implements Observer {
 
     private String PATH = "..\\KochConsole\\edges.tmp";
     private String PATHTXT = "..\\KochConsole\\edges.txt";
-    private String PATHRAM = "..\\KochConsole\\edges.ram";
-    private String PATHFOLDER = "..\\KochConsole\\";
+    private String PATHRAM = "..\\KochConsole\\dist\\edges.ram";
+    private String PATHFOLDER = "..\\KochConsole\\dist\\";
     private JSF31KochFractalFX application;
     private KochFractal koch;
     private ArrayList<Edge> edges;
@@ -68,87 +68,17 @@ public class KochManager implements Observer {
     private WatchService watchService;
     private Path folder;
 
-    public KochManager(JSF31KochFractalFX object) {
+    public KochManager(JSF31KochFractalFX object) throws IOException {
         application = object;
         edges = new ArrayList<>();
         this.koch = new KochFractal();
-//        try {
-//            checkForFileChange();
-//        } catch (IOException ex) {
-//            Logger.getLogger(KochManager.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+        checkForFileChange();
     }
 
     public void checkForFileChange() throws IOException {
         folder = Paths.get(PATHFOLDER);
-
-// Create a new Watch Service
-        watchService = FileSystems.getDefault().newWatchService();
-
-// Register events
-        folder.register(watchService,
-                StandardWatchEventKinds.ENTRY_CREATE,
-                StandardWatchEventKinds.ENTRY_MODIFY,
-                StandardWatchEventKinds.ENTRY_DELETE);
-        new Runnable() {
-            @Override
-            public void run() {
-                for (;;) {
-
-                    WatchKey key;
-
-                    try {
-                        System.out.println("Waiting for key to be signalled...");
-
-                        key = watchService.take();
-
-                    } catch (InterruptedException ex) {
-
-                        System.out.println("Interrupted Exception");
-
-                        return;
-
-                    }
-
-                    List<WatchEvent<?>> eventList = key.pollEvents();
-
-                    System.out.println("Process the pending events for the key: " + eventList.size());
-
-                    for (WatchEvent<?> genericEvent : eventList) {
-
-                        WatchEvent.Kind<?> eventKind = genericEvent.kind();
-
-                        System.out.println("Event kind: " + eventKind);
-
-                        if (eventKind == StandardWatchEventKinds.OVERFLOW) {
-
-                            continue; // pending events for loop
-
-                        } else if (eventKind == StandardWatchEventKinds.ENTRY_CREATE) {
-                            loadMemoryMappedFile();
-                        }
-                        System.out.println("File name: ");
-
-                    }
-
-                    boolean validKey = key.reset();
-
-                    System.out.println("Key reset");
-
-                    System.out.println("");
-
-                    if (!validKey) {
-
-                        System.out.println("Invalid key");
-
-                        break; // infinite for loop
-
-                    }
-
-                }
-            }
-
-        }.run();
+        WatchServiceRunnable wsr = new WatchServiceRunnable(folder, this);
+        new Thread(wsr).start();
     }
 
     public void loadMemoryMappedFile() {
