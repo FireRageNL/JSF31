@@ -27,8 +27,8 @@ import javafx.stage.Stage;
 import timeutil.TimeStamp;
 
 /**
- *
- * @author Nico Kuijpers
+ *DIT IS DE APPLICAITE OVER FILE LOCKING
+ * @author Nico Kuijpers The One and ONLY
  */
 public class JSF31KochFractalFX extends Application {
 
