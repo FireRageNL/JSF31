@@ -20,6 +20,7 @@ import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,7 +54,7 @@ public class KochManager implements Observer {
 
     private String PATH = "..\\KochConsole\\edges.tmp";
     private String PATHTXT = "..\\KochConsole\\edges.txt";
-    private String PATHRAM = "..\\KochConsole\\dist\\edges.ram";
+    private String PATHRAM = "..\\KochConsole\\edge.ram";
     private String PATHFOLDER = "..\\KochConsole\\dist\\";
     private JSF31KochFractalFX application;
     private KochFractal koch;
@@ -67,12 +68,13 @@ public class KochManager implements Observer {
     private Task bottom;
     private WatchService watchService;
     private Path folder;
+    
 
     public KochManager(JSF31KochFractalFX object) throws IOException {
         application = object;
         edges = new ArrayList<>();
         this.koch = new KochFractal();
-        checkForFileChange();
+        loadMemoryMappedFile();
     }
 
     public void checkForFileChange() throws IOException {
@@ -82,44 +84,64 @@ public class KochManager implements Observer {
     }
 
     public void loadMemoryMappedFile() {
-        new Thread(new Runnable(){
+        
+        new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(KochManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                FileLock intLock = null;
+                FileLock fl;
                 application.clearKochPanel();
-        edges = new ArrayList();
-        TimeStamp t = new TimeStamp();
-        t.setBegin("Start measure");
-        try {
-            File file = new File(PATHRAM);
-            FileChannel fchannel = new RandomAccessFile(file, "r").getChannel();
-            MappedByteBuffer mbb = fchannel.map(FileChannel.MapMode.READ_ONLY, 0, fchannel.size());
-            while (mbb.hasRemaining()) {
-                Edge e = new Edge(mbb.getDouble(), mbb.getDouble(), mbb.getDouble(), mbb.getDouble(), javafx.scene.paint.Color.RED);
-                edges.add(e);
-            }
-            fchannel.close();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        t.setEnd("End measure");
-        System.out.println(t.toString());
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                for (Edge e : edges) {
-                    application.drawEdge(e);
+                edges = new ArrayList();
+                TimeStamp t = new TimeStamp();
+                t.setBegin("Start measure");
+
+                try {
+                    File file = new File(PATHRAM);
+                    FileChannel fchannel = new RandomAccessFile(file, "r").getChannel();
+                    MappedByteBuffer mbb = fchannel.map(FileChannel.MapMode.READ_ONLY, 0, fchannel.size());
+                    //insert read code;
+                    int NBYTES = ((int) fchannel.size() - 4) / 32;
+                    System.out.println(NBYTES);
+                    
+                    for (int i = 0; NBYTES > i; i++) {
+                        
+                        mbb.position(0);
+                        int position = mbb.getInt();
+                        int edgesSize = edges.size();
+                        for(;;){
+                        while (edgesSize < position) {
+                            intLock = fchannel.lock(0, 4, true);
+                            //System.out.println(edgesSize);
+                            fl = fchannel.lock((edgesSize * 32) + 4, 32, true);
+                            int pos = (edgesSize * 32) + 4;
+                            mbb.position(pos);
+                            double X1 = mbb.getDouble();
+                            double Y1 = mbb.getDouble();
+                            double X2 = mbb.getDouble();
+                            double Y2 = mbb.getDouble();
+                            //System.out.println(X1 + "-"+Y1 + "-"+ X2 + "-"+ Y2);
+                            Edge e = new Edge(X1, Y1, X2, Y2, javafx.scene.paint.Color.BLUE);
+                            edges.add(e);
+                            fl.release();
+                            application.requestDrawEdge(e);
+                            edgesSize = edges.size();
+                            //Thread.sleep(1);
+                            intLock.release();
+                        }
+                        
+                        }
+                    }
+                    
+                    fchannel.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
+
+                t.setEnd("End measure");
+                System.out.println(t.toString());
             }
 
-        });
-            }
         }).start();
-        
 
     }
 

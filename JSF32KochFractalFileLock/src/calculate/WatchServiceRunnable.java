@@ -52,11 +52,8 @@ public class WatchServiceRunnable implements Runnable {
 
                     WatchEvent.Kind kind = ev.kind();
                     if (kind == ENTRY_CREATE) {
-                        System.out.println(child + " created");
-                        File f = new File("..\\KochConsole\\edges.ram");        
-                        if(f.exists()){
+                        System.out.println(child + " created");     
                             km.loadMemoryMappedFile();
-                        }
                     }
                     if (kind == ENTRY_DELETE) {
                         System.out.println(child + " deleted");

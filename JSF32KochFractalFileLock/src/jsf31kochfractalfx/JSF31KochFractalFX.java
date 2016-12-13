@@ -228,7 +228,7 @@ public class JSF31KochFractalFX extends Application {
         resetZoom();
         kochManager = new KochManager(this);
         //koch.addObserver(kochManager);
-        kochManager.changeLevel(currentLevel);
+        //kochManager.changeLevel(currentLevel);
         // Create the scene and add the grid pane
         Group root = new Group();
         Scene scene = new Scene(root, kpWidth + 350, kpHeight + 270);
@@ -249,6 +249,17 @@ public class JSF31KochFractalFX extends Application {
         gc.clearRect(0.0, 0.0, kpWidth, kpHeight);
         gc.setFill(Color.BLACK);
         gc.fillRect(0.0, 0.0, kpWidth, kpHeight);
+    }
+    
+    
+    public void requestDrawEdge(final Edge e){
+        Platform.runLater(new Runnable(){
+                                @Override
+                                public void run() {
+                                    drawEdge(e);
+
+                                }
+                            });
     }
 
     public void drawEdge(Edge e) {
