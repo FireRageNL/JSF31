@@ -44,6 +44,7 @@ import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import jsf31kochfractalfx.JSF31KochFractalFX;
+import sun.nio.ch.DirectBuffer;
 import timeutil.TimeStamp;
 
 /**
@@ -54,7 +55,7 @@ public class KochManager implements Observer {
 
     private String PATH = "..\\KochConsole\\edges.tmp";
     private String PATHTXT = "..\\KochConsole\\edges.txt";
-    private String PATHRAM = "..\\KochConsole\\edge.ram";
+    private String PATHRAM = "..\\KochConsole\\dist\\edge.ram";
     private String PATHFOLDER = "..\\KochConsole\\dist\\";
     private JSF31KochFractalFX application;
     private KochFractal koch;
@@ -74,7 +75,7 @@ public class KochManager implements Observer {
         application = object;
         edges = new ArrayList<>();
         this.koch = new KochFractal();
-        loadMemoryMappedFile();
+        checkForFileChange();
     }
 
     public void checkForFileChange() throws IOException {
@@ -102,7 +103,6 @@ public class KochManager implements Observer {
                     FileLock lock = fchannel.lock(0,4,true);
                     int NEDGES = mbb.getInt();
                     lock.release();
-                    System.out.println(NEDGES);
                     int drawnEdges = edges.size();
                     while(NEDGES > drawnEdges) {
                         FileLock intLock = fchannel.lock(4,4,true);
@@ -117,19 +117,19 @@ public class KochManager implements Observer {
                             double X2 = mbb.getDouble();
                             double Y2 = mbb.getDouble();
                             edgeLock.release();
-                            Edge e = new Edge(X1,Y1,X2,Y2,javafx.scene.paint.Color.AQUAMARINE);
+                            Edge e = new Edge(X1,Y1,X2,Y2,javafx.scene.paint.Color.WHITE);
                             edges.add(e);
                             application.requestDrawEdge(e);
                         }
                         drawnEdges = edges.size();
                     }
-                    
                     fchannel.close();
+                    unmap(mbb);
+                    System.out.println("end");
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
 
-                t.setEnd("End measure");
                 System.out.println(t.toString());
             }
 
@@ -376,5 +376,9 @@ public class KochManager implements Observer {
         } catch (Exception ex) {
             System.out.println("Error: " + ex.getMessage());
         }
+    }
+        public static void unmap(MappedByteBuffer buffer) {
+        sun.misc.Cleaner cleaner = ((DirectBuffer) buffer).cleaner();
+        cleaner.clean();
     }
 }

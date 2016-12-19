@@ -34,7 +34,7 @@ public class KochConsole implements Observer {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws FileNotFoundException, IOException {
         KochConsole app = new KochConsole();
         //app.doTheStuffWithOutputStreams();
         //app.doTheStuffWithNonBufferWriters();
@@ -42,7 +42,11 @@ public class KochConsole implements Observer {
         app.doTheStuffWithMemoryMappedfile();
     }
 
-    public void doTheStuffWithMemoryMappedfile() {
+    public void doTheStuffWithMemoryMappedfile() throws IOException {
+        if(Files.exists(Paths.get("edge.ram"))){
+            Files.delete(Paths.get("edge.ram"));
+        }
+        
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter the level to be generated: ");
         int level = scanner.nextInt();
@@ -65,7 +69,7 @@ public class KochConsole implements Observer {
         int numberOfBytes = kf.getNrOfEdges() * 4 * 8;
         try {
             RandomAccessFile raf = new RandomAccessFile("edge.ram", "rw");
-            MappedByteBuffer mbf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, numberOfBytes+4);
+            MappedByteBuffer mbf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, numberOfBytes+8);
             FileLock instantLock = raf.getChannel().lock(0,4,false);
             mbf.putInt(kf.getNrOfEdges());
             instantLock.release();
@@ -74,13 +78,13 @@ public class KochConsole implements Observer {
                 FileLock intLock = raf.getChannel().lock(4,4,false);
                 FileLock lock = raf.getChannel().lock((numberOfEdges * 32) + 8, 32, false);
                 mbf.position(4);
-                mbf.putInt(numberOfEdges);
-                mbf.position((numberOfEdges*32)+4);
+                mbf.putInt(numberOfEdges+1);
+                mbf.position((numberOfEdges*32)+8);
                 mbf.putDouble(e.X1);
                 mbf.putDouble(e.Y1);
                 mbf.putDouble(e.X2);
                 mbf.putDouble(e.Y2);
-                System.out.println("Edge written");
+                System.out.println("Edge written (" + (numberOfEdges+1) + "/"+kf.getNrOfEdges()+")");
                 numberOfEdges++;
                 lock.release();
                 intLock.release();

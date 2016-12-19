@@ -257,7 +257,6 @@ public class JSF31KochFractalFX extends Application {
                                 @Override
                                 public void run() {
                                     drawEdge(e);
-
                                 }
                             });
     }

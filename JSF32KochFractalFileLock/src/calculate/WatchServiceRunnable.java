@@ -42,7 +42,9 @@ public class WatchServiceRunnable implements Runnable {
     public void run() {
         try {
             dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+            int i = 0;
             while (true) {
+                
                 key = watcher.take();
                 for (WatchEvent<?> event : key.pollEvents()) {
                     WatchEvent<Path> ev = (WatchEvent<Path>) event;
@@ -52,15 +54,23 @@ public class WatchServiceRunnable implements Runnable {
 
                     WatchEvent.Kind kind = ev.kind();
                     if (kind == ENTRY_CREATE) {
-                        System.out.println(child + " created");
-                        Thread.sleep(50);
-                            km.loadMemoryMappedFile();
+                        
+                            
                     }
                     if (kind == ENTRY_DELETE) {
                         System.out.println(child + " deleted");
                     }
                     if (kind == ENTRY_MODIFY) {
                         System.out.println(child + " modified");
+                        Thread.sleep(50);
+                        if(i == 1){
+                        i=0;
+                        km.loadMemoryMappedFile();
+                        }
+                        else{
+                            i++;
+                        }
+                        
                     }
                 }
                 key.reset();
