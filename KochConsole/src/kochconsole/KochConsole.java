@@ -66,12 +66,14 @@ public class KochConsole implements Observer {
         try {
             RandomAccessFile raf = new RandomAccessFile("edge.ram", "rw");
             MappedByteBuffer mbf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, numberOfBytes+4);
+            FileLock instantLock = raf.getChannel().lock(0,4,false);
             mbf.putInt(kf.getNrOfEdges());
+            instantLock.release();
             int numberOfEdges = 0;
             for (Edge e : ret) {
-                FileLock intLock = raf.getChannel().lock(0,4,false);
-                FileLock lock = raf.getChannel().lock((numberOfEdges * 32) + 4, 32, true);
-                mbf.position(0);
+                FileLock intLock = raf.getChannel().lock(4,4,false);
+                FileLock lock = raf.getChannel().lock((numberOfEdges * 32) + 8, 32, false);
+                mbf.position(4);
                 mbf.putInt(numberOfEdges);
                 mbf.position((numberOfEdges*32)+4);
                 mbf.putDouble(e.X1);
