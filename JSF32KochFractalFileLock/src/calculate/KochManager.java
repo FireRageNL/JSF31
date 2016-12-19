@@ -88,8 +88,7 @@ public class KochManager implements Observer {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                FileLock intLock = null;
-                FileLock fl;
+
                 application.clearKochPanel();
                 edges = new ArrayList();
                 TimeStamp t = new TimeStamp();
@@ -100,36 +99,29 @@ public class KochManager implements Observer {
                     FileChannel fchannel = new RandomAccessFile(file, "r").getChannel();
                     MappedByteBuffer mbb = fchannel.map(FileChannel.MapMode.READ_ONLY, 0, fchannel.size());
                     //insert read code;
-                    int NBYTES = ((int) fchannel.size() - 4) / 32;
-                    System.out.println(NBYTES);
-                    
-                    for (int i = 0; NBYTES > i; i++) {
-                        
-                        mbb.position(0);
-                        int position = mbb.getInt();
-                        int edgesSize = edges.size();
-                        for(;;){
-                        while (edgesSize < position) {
-                            intLock = fchannel.lock(0, 4, true);
-                            //System.out.println(edgesSize);
-                            fl = fchannel.lock((edgesSize * 32) + 4, 32, true);
-                            int pos = (edgesSize * 32) + 4;
-                            mbb.position(pos);
+                    FileLock lock = fchannel.lock(0,4,true);
+                    int NEDGES = mbb.getInt();
+                    lock.release();
+                    System.out.println(NEDGES);
+                    int drawnEdges = edges.size();
+                    while(NEDGES > drawnEdges) {
+                        FileLock intLock = fchannel.lock(4,4,true);
+                        mbb.position(4);
+                        int edgesWritten = mbb.getInt();
+                        intLock.close();
+                        for(int i = drawnEdges; i < edgesWritten; i++){
+                            FileLock edgeLock = fchannel.lock((i*32)+8,32,true);
+                            mbb.position((i*32)+8);
                             double X1 = mbb.getDouble();
                             double Y1 = mbb.getDouble();
                             double X2 = mbb.getDouble();
                             double Y2 = mbb.getDouble();
-                            //System.out.println(X1 + "-"+Y1 + "-"+ X2 + "-"+ Y2);
-                            Edge e = new Edge(X1, Y1, X2, Y2, javafx.scene.paint.Color.BLUE);
+                            edgeLock.release();
+                            Edge e = new Edge(X1,Y1,X2,Y2,javafx.scene.paint.Color.AQUAMARINE);
                             edges.add(e);
-                            fl.release();
                             application.requestDrawEdge(e);
-                            edgesSize = edges.size();
-                            //Thread.sleep(1);
-                            intLock.release();
                         }
-                        
-                        }
+                        drawnEdges = edges.size();
                     }
                     
                     fchannel.close();

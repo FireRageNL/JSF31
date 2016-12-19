@@ -52,7 +52,8 @@ public class WatchServiceRunnable implements Runnable {
 
                     WatchEvent.Kind kind = ev.kind();
                     if (kind == ENTRY_CREATE) {
-                        System.out.println(child + " created");     
+                        System.out.println(child + " created");
+                        Thread.sleep(50);
                             km.loadMemoryMappedFile();
                     }
                     if (kind == ENTRY_DELETE) {
