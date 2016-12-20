@@ -108,10 +108,11 @@ public class KochManager implements Observer {
                     comProtocol.put("level", level);
                     comProtocol.put("type", 2);
                     out.writeObject(comProtocol);
-                    Edge e = (Edge)in.readObject();
-                    while(e != null){
+                    Edge e = (Edge) in.readObject();
+                    while (e != null) {
+                        edges.add(e);
                         application.requestDrawEdge(e);
-                        e = (Edge)in.readObject();
+                        e = (Edge) in.readObject();
                     }
                 } catch (IOException ex) {
 

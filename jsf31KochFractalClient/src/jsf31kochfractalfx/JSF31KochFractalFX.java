@@ -18,6 +18,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.input.*;
@@ -68,6 +69,7 @@ public class JSF31KochFractalFX extends Application {
     public ProgressBar progressBarRight;
     public Label labelProgressBottomEdge;
     public ProgressBar progressBarBottom;
+    public CheckBox cb;
 
     @Override
     public void start(Stage primaryStage) throws InterruptedException, ExecutionException, IOException {
@@ -107,10 +109,6 @@ public class JSF31KochFractalFX extends Application {
         labelLevel = new Label("Level: " + currentLevel);
         grid.add(labelLevel, 0, 6);
 
-        
-        
-        
-        
         // Button to increase level of Koch fractal
         Button buttonIncreaseLevel = new Button();
         buttonIncreaseLevel.setText("Increase Level");
@@ -155,9 +153,8 @@ public class JSF31KochFractalFX extends Application {
             }
         });
         grid.add(buttonFitFractal, 14, 6);
-        
-        
-         Button buttonrequestFractal = new Button();
+
+        Button buttonrequestFractal = new Button();
         buttonrequestFractal.setText("Request from Server");
         buttonrequestFractal.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -169,35 +166,16 @@ public class JSF31KochFractalFX extends Application {
                 }
             }
 
-            
         });
         grid.add(buttonrequestFractal, 18, 10);
 
         //ProgressBars and Labels
-        progressBarLeft = new ProgressBar();
-        progressBarRight = new ProgressBar();
-        progressBarBottom = new ProgressBar();
-        labelProgressLeftEdge = new Label();
-        labelProgressRightEdge = new Label();
-        labelProgressBottomEdge = new Label();
-        
+        cb = new CheckBox();
+        cb.setIndeterminate(false);
+
         //Bar Left
-        grid.add(new Label("Left:"), 18, 1);
-        grid.add(progressBarLeft, 19, 1);
-        grid.add(new Label("Edges calculated:"), 20, 1);
-        grid.add(labelProgressLeftEdge, 21, 1);
-
-        //Bar Right
-        grid.add(new Label("Right:"), 18, 2);
-        grid.add(progressBarRight, 19, 2);
-        grid.add(new Label("Edges calculated:"), 20, 2);
-        grid.add(labelProgressRightEdge, 21, 2);
-
-        //Bar Bottom
-        grid.add(new Label("Bottom:"), 18, 3);
-        grid.add(progressBarBottom, 19, 3);
-        grid.add(new Label("Edges calculated:"), 20, 3);
-        grid.add(labelProgressBottomEdge, 21, 3);
+        grid.add(new Label("Send edges directly"), 18, 1);
+        grid.add(cb, 19, 1);
 
         // Add mouse clicked event to Koch panel
         kochPanel.addEventHandler(MouseEvent.MOUSE_CLICKED,
@@ -225,9 +203,6 @@ public class JSF31KochFractalFX extends Application {
             }
         });
 
-        
-        
-        
         // Create Koch manager and set initial level
         resetZoom();
         kochManager = new KochManager(this);
@@ -238,10 +213,6 @@ public class JSF31KochFractalFX extends Application {
         Scene scene = new Scene(root, kpWidth + 350, kpHeight + 270);
         root.getChildren().add(grid);
 
-        
-        
-        
-        
         // Define title and assign the scene for main window
         primaryStage.setTitle("Koch Fractal");
         primaryStage.setScene(scene);
@@ -300,15 +271,19 @@ public class JSF31KochFractalFX extends Application {
     }
 
     private void buttonrequestFractalActionPerformed(ActionEvent event) throws IOException {
-                kochManager.getPerEdge(9);
-            }
-    
+        kochManager.getPerEdge(9);
+    }
+
     private void increaseLevelButtonActionPerformed(ActionEvent event) throws InterruptedException, ExecutionException {
         if (currentLevel < 12) {
             // resetZoom();
             currentLevel++;
             labelLevel.setText("Level: " + currentLevel);
-            kochManager.changeLevel(currentLevel);
+            if (cb.isSelected()) {
+                kochManager.getPerEdge(currentLevel);
+            } else {
+                kochManager.changeLevel(currentLevel);
+            }
         }
     }
 
@@ -317,7 +292,11 @@ public class JSF31KochFractalFX extends Application {
             // resetZoom();
             currentLevel--;
             labelLevel.setText("Level: " + currentLevel);
-            kochManager.changeLevel(currentLevel);
+            if (cb.isSelected()) {
+                kochManager.getPerEdge(currentLevel);
+            } else {
+                kochManager.changeLevel(currentLevel);
+            }
         }
     }
 
@@ -385,12 +364,12 @@ public class JSF31KochFractalFX extends Application {
         launch(args);
     }
 
-    public void requestDrawEdge(final Edge e){
-        Platform.runLater(new Runnable(){
-                                @Override
-                                public void run() {
-                                    drawEdge(e);
-                                }
-                            });
+    public void requestDrawEdge(final Edge e) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                drawEdge(e);
+            }
+        });
     }
 }

@@ -95,7 +95,6 @@ public class KochConsoleServer {
             for (Edge e : edges) {
                 out.writeObject(e);
             }
-
             out.flush();
             in.close();
         } catch (IOException ex) {
