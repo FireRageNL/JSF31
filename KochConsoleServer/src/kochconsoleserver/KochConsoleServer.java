@@ -40,31 +40,40 @@ public class KochConsoleServer {
         KochConsoleServer kcs = new KochConsoleServer();
         server = new ServerSocket(8189);
         System.out.println("Server started... waiting for requests...");
-        while(true){
-        kcs.messageReceived();
+        while (true) {
+            kcs.messageReceived();
         }
 
     }
 
-    public void messageReceived() throws ClassNotFoundException{
+    public void messageReceived() throws ClassNotFoundException {
         InputStream inStream = null;
         try {
-            Socket incoming = server.accept(); //wait for reply
-            System.out.println("Connected to "+ incoming.getInetAddress());
+            final Socket incoming = server.accept(); //wait for reply
+            System.out.println("Connected to " + incoming.getInetAddress());
             OutputStream outStream = incoming.getOutputStream();
             inStream = incoming.getInputStream();
-            ObjectInputStream in = null;
-            in = new ObjectInputStream(inStream);
+            final ObjectInputStream in = new ObjectInputStream(inStream);
             ObjectOutputStream out = new ObjectOutputStream(outStream);
-            Map<String, Integer> message = (Map<String, Integer>)in.readObject();
-            switch(message.get("type")){
+            final Map<String, Integer> message = (Map<String, Integer>) in.readObject();
+            switch (message.get("type")) {
                 case 1:
                     System.out.println("Full generate requested..");
-                    sendEdgesFull(message.get("level"),incoming,out, in);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            sendEdgesFull(message.get("level"), incoming, out, in);
+                        }
+                    }).start();
                     break;
                 case 2:
                     System.out.println("Per edge requested..");
-                    sendPerEdge(message.get("level"),in,out);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            sendPerEdge(message.get("level"), in, out);
+                        }
+                    }).start();
                     break;
                 case 3:
                     break;
@@ -73,18 +82,12 @@ public class KochConsoleServer {
             }
         } catch (IOException ex) {
             Logger.getLogger(KochConsoleServer.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                inStream.close();
-            } catch (IOException ex) {
-                Logger.getLogger(KochConsoleServer.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        } 
     }
-    
-    public void sendEdgesFull(int level, Socket incoming,ObjectOutputStream out, ObjectInputStream in) {
+
+    public void sendEdgesFull(int level, Socket incoming, ObjectOutputStream out, ObjectInputStream in) {
         try {
-            KochGenerator kg = new KochGenerator(1,this);
+            KochGenerator kg = new KochGenerator(1, this);
             kg.generateFractal(level);
             edges = kg.getEdges();
             out.writeInt(edges.size());
@@ -100,17 +103,15 @@ public class KochConsoleServer {
         }
 
     }
-    
-    public void sendEdge(final Edge e,ObjectOutputStream out, ObjectInputStream in) throws IOException{
+
+    public void sendEdge(final Edge e, ObjectOutputStream out, ObjectInputStream in) throws IOException {
         out.writeObject(e);
         out.flush();
     }
 
     private void sendPerEdge(int level, ObjectInputStream in, ObjectOutputStream out) {
         KochGenerator kg = new KochGenerator(2, this);
-        kg.GenerateAndSend(level,in,out);
+        kg.GenerateAndSend(level, in, out);
     }
-    
 
-    
 }

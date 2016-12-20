@@ -22,3 +22,4 @@ private/
 *.zip
 KochConsole/edges.txt
 *.ram
+JSF32KochFractalFileLock/nbproject/private/private.properties
