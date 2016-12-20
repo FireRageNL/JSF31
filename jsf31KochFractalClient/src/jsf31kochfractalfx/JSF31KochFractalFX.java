@@ -300,7 +300,7 @@ public class JSF31KochFractalFX extends Application {
     }
 
     private void buttonrequestFractalActionPerformed(ActionEvent event) throws IOException {
-                kochManager.requestEdges();
+                kochManager.getPerEdge(9);
             }
     
     private void increaseLevelButtonActionPerformed(ActionEvent event) throws InterruptedException, ExecutionException {
